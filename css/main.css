@@ -33,23 +33,15 @@ footer {
     font-size: .8em;
 }
 
-ul.posts {
+ul.post {
     margin: 20px auto 40px;
     font-size: 1.5em;
 }
 
-ul.posts li {
+ul.post li {
     list-style: none;
 }
 
-ul.CV {
-  font-size: 1.5em;
-  line-height: 1.4em;
-  color: #333;
-}
-
-ul.CV li {
-  font-size: 1.5em;
-  line-height: 1.4em;
-  color: #333;
+p.CV {
+  color: red;
 }
