@@ -1,10 +1,10 @@
+*{font-family: 'Roboto', sans-serif;}
+
 body {
-    font-family: 'Roboto', sans-serif;
     margin: 60px auto;
     width: 70%;
 }
 nav ul, footer ul {
-    font-family: 'Roboto', sans-serif;
     padding: 0px;
     list-style: none;
     font-weight: bold;
@@ -22,13 +22,11 @@ a:hover {
 }
 h1 {
     font-size: 3em;
-    font-family: 'Roboto', sans-serif;
 }
 p {
     font-size: 1.5em;
     line-height: 1.4em;
     color: #333;
-    font-family: 'Roboto', sans-serif;
 }
 footer {
     border-top: 1px solid #d5d5d5;
