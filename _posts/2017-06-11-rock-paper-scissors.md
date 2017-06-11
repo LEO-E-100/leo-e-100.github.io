@@ -12,7 +12,7 @@ It is essentially composed of a series of functions which iteratively call the n
 
 Having set up the values to work on I set about creating functionality. This involved some simple white board diagrams and a step by step definition of what a game of rock-paper-scissors involves. Defining a computer generated move was a simple case of randomly generating a number between 1 and 3.
 
-```
+```python
 computer = random.randint(1,3)
 ```
 
@@ -20,7 +20,7 @@ A user generated move was more complex, having not learned much about making pro
 
 After functions had been defined to show the two moves made, the results had to be evaluated. This was first achieved by simply printing the result using some if-else blocks to compare the two values. However I thought this was unsatisfying as there was no *'game'* feeling to the program. I decided to add a countdown, this would reflect the atmosphere of the game, and mimic a real game of rps better than simply printing results. Using the 'time' package the countdown was achieved fairly simply.
 
-```
+```python
 def result(player, computer):
     print "1..."
     time.sleep(1)
@@ -43,4 +43,3 @@ def result(player, computer):
 This comparison also required the initialisation of the 'rules' dictionary which simply outlined which value would beat which. I have to admit that this particular method was largely gained from googling around for an elegant solution that didn't require a long series of if-else blocks with each combination in (this was my first solution).
 
 The final function was a simple printing of the scores at the end of the game. This took me longer than I care to admit as the variables did not have block level scope. This taught me a valuable lesson about how variables work in python.
-  
