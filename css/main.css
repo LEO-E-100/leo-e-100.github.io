@@ -8,15 +8,15 @@ nav ul, footer ul {
     padding: 0px;
     list-style: none;
     font-weight: bold;
+    float: right;
 }
 nav ul li, footer ul li {
     display: inline;
     margin-right: 20px;
 }
-ul.projects{
+.projects {
   font-size: 1.5em;
   line-height: 1.4em;
-  color: #333;
 }
 a {
     text-decoration: none;
@@ -43,7 +43,7 @@ ul.post {
     font-size: 1.5em;
 }
 
-ul.post li {
+ul.posts li {
     list-style: none;
 }
 
