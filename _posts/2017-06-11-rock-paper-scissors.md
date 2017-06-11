@@ -6,6 +6,8 @@ date: 2017-06-11
 
 ### Rock Paper Scissors project
 
+## [Code Repo](https://github.com/LEO-E-100/Rock-Paper-Scissors)
+
 This project was my first time programming after finishing some basic python tutorials. I think I did an ok job and iterated until it was nearly perfect. This whole project took me a long time and taught me a huge amount about how Python works.
 
 It is essentially composed of a series of functions which iteratively call the next function. The data structures used were the most basic. First the values of 'rock' 'paper' and 'scissors' are assigned integer values which allows for random generation, next the variables are assigned to string equivalents using a dictionary (key-value pairs). Having now studied data structures formally I can say this is a look up table and has many efficiency benefits, when I wrote this I considered this to simply be the best way to make it work (much googling was done). Finally to give the game some replay value I decided to keep score by initialising two variables to zero to keep score.
