@@ -4,8 +4,6 @@ title: "Rock Paper Scissors"
 date: 2017-06-11
 ---
 
-## Rock Paper Scissors project
-
 ### [Code Repo](https://github.com/LEO-E-100/Rock-Paper-Scissors)
 
 This project was my first time programming after finishing some basic python tutorials. I think I did an ok job and iterated until it was nearly perfect. This whole project took me a long time and taught me a huge amount about how Python works.
