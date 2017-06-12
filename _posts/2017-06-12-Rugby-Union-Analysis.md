@@ -4,7 +4,7 @@ title: "r/RugbyUnion Player Ratings"
 date: 2017-06-12
 ---
 
-### [Code Repo](https://github.com/LEO-E-100/Rock-Paper-Scissors)
+### [Code Repo](https://github.com/LEO-E-100/Lions_Tour_Ratings)
 
 Data has been taken from the crowd sourced player ratings from each of the games for the British and Irish Lions. Each player in the squad is rated for their performance (assuming they played) after each match.
 
