@@ -1,4 +1,5 @@
 name: Leo Edwards, Student Developer
+highlighter: rouge
 markdown: kramdown
 permalink: /blog/:year/:month/:day/:title
 paginate: 5
