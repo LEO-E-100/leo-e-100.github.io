@@ -1,0 +1,29 @@
+---
+layout: post
+title: "Fermat's Last Theorem"
+date: 2017-07-30
+---
+
+### Fermat's Last Theorem - Simon Singh
+
+This book was absolutely fantastic. It created a palpable sense of tension around the announcement of the proof which I think is a really impressive achievement given the seemingly low tension world of mathematics. 
+
+It particularly conveyed a sense of the intensely beautiful world of pure mathematics. I was struck by the quote of G.H. Hardy regarding the way in which pure mathematics has little to no practical application to real world questions. This level of mathematics is really just for the exploration of the beauty of the universe.
+
+> I will only say that if a chess problem is, in the crude sense, 'useless', then that is equally true of most of the best mathematics... I have never done anything 'useful'. No discovery of mine has made, or is likely to make, directly or indirectly, for good or ill, the least difference to the amenity of the world. Judged by all practical standards, the value of my mathematical life is nil; and outside mathematics it is trivial anyhow. I have just one chance of escaping a verdict of complete triviality, that I may be judged to have created something worth creating. And that I have created something is undeniable: the quetion is about its value.
+
+A question that I feel needed to be more thoroughly addressed was the issue that Wile's proof is unlikely to be the "remarkable" proof referred to by Fermat in his notes. This begs several questions.
+
+1. Was the proof Fermat arrived at true?
+2. Did perhaps Fermat arrive at a 17th Century proof of this conjecture which is simpler and has not been found by modern mathematicians?
+3. If that is the case the Fermat proof is clearly still to be found. Will it ever be found?
+
+The book also ends at a moment which, for me, was unsatisfactory in that the further implications of proving the Taniyama-Shimura conjecture were not explored. How far has the interconnectedness of mathematics been looked at now? Have the deeper mathematics been discovered? How far into 'Langland's Programme' are we now?
+
+This book really sparked my interest in maths and encouraged me to look deeper which I will do in due course. The **7 Brief Lessons on Physics by Carlo Rovelli** will be my next read.
+
+Further I think this book did a brilliant job of exploring the historical characters involved and the context in which they existed. Sophie Germain is of particular interest to me due to the political implications of a woman becoming accepted in Mathematics in France during her time period. The observation that maths often runs in families (with many women finding themselves drawn to maths due to the influence of a mathematically minded father, in many cases maths professors. It strikes me that the extent to which a child experiences maths at a young age will often define their abilities in the subject. This is perhaps not surprising given a person will tend to study what they know and enjoy and having an encouraging parent will only help that. However I think its interesting primarily for the fact that it seems that mathematical ability is not necessarily innate.
+
+The concept of a mathematical proof was one which I was already familiar with, however having finished this book I feel I was not as appreciative of them as I perhaps should have been. They represent possibly the closest to truth that humans will ever get to knowing about the universe. Heisenberg, Planck and other Quantum physiscits notwithstanding.
+
+The examples of mathematical proofs presented in the appendices are very enlightening and provide a really great insight into the early proofs of Pythagoras and how a proof is constructed. The interesting notion that Pythagoras was both the first to provide a clear explanation of mathematical proof and certainty and then for him to reject the very notion of irrational numbers (for which a proof came to exist) is interesting.
