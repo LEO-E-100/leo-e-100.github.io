@@ -4,8 +4,6 @@ title: "Cancer Detection"
 date: 2017-11-22
 ---
 
-### {{ page.title}}
-
 ```python
 import numpy as np
 import pandas as pd
