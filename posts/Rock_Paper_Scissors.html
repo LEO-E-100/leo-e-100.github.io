@@ -2,7 +2,7 @@
 <html>
 <head><meta charset="utf-8" />
 <title>Notebook</title>
-<link rel="stylesheet" href="assets/css/main.css" />
+<link rel="stylesheet" href="../assets/css/main.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
@@ -11772,9 +11772,9 @@ div#notebook {
 <body>
 <nav id="nav">
         <ul class="container">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="blog.html">Blog</a></li>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../blog.html">Blog</a></li>
         </ul>
 </nav>
 
@@ -11785,7 +11785,74 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Hi-there,-I'm-Leo!">Hi there, I'm Leo!<a class="anchor-link" href="#Hi-there,-I'm-Leo!">&#182;</a></h1><p>I'm a London based data scientist with a particular interest in Big Data and Computational Biology. <a href="about.html">Read More...</a></p>
+<h1 id="Rock-Paper-Scissors">Rock Paper Scissors<a class="anchor-link" href="#Rock-Paper-Scissors">&#182;</a></h1><p><em>11-06-2017</em></p>
+<p>This project was my first time programming after finishing some basic python tutorials. I think I did an ok job and iterated until it was nearly perfect. This whole project took me a long time and taught me a huge amount about how Python works.</p>
+<p>It is essentially composed of a series of functions which iteratively call the next function. The data structures used were the most basic. First the values of 'rock' 'paper' and 'scissors' are assigned integer values which allows for random generation, next the variables are assigned to string equivalents using a dictionary (key-value pairs). Having now studied data structures formally I can say this is a look up table and has many efficiency benefits, when I wrote this I considered this to simply be the best way to make it work (much googling was done). Finally to give the game some replay value I decided to keep score by initialising two variables to zero to keep score.</p>
+<p>Having set up the values to work on I set about creating functionality. This involved some simple white board diagrams and a step by step definition of what a game of rock-paper-scissors involves. Defining a computer generated move was a simple case of randomly generating a number between 1 and 3.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="n">computer</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A user generated move was more complex, having not learned much about making programs interactive during my early tutorials I had to learn about the <code>raw_input</code> function of python. This worked initially however it occurred to me that a person could enter a value that wasn't an integer between one and three and the program would break. This introduced me to exception handling for the first time. A try-except block was used to ensure that if the value was invalid a reminder would pop up to show the user the way. I also got stuck on casting the input value as an integer, after googling why the system might be throwing errors I found the answer, however it was only after my Intro to Programming class at UCL that I found out the underlying reason for doing this.</p>
+<p>After functions had been defined to show the two moves made, the results had to be evaluated. This was first achieved by simply printing the result using some if-else blocks to compare the two values. However I thought this was unsatisfying as there was no <em>'game'</em> feeling to the program. I decided to add a countdown, this would reflect the atmosphere of the game, and mimic a real game of rps better than simply printing results. Using the 'time' package the countdown was achieved fairly simply.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="n">player</span><span class="p">,</span> <span class="n">computer</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s2">&quot;1...&quot;</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s2">&quot;2...&quot;</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s2">&quot;3!&quot;</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s2">&quot;Computer threw {0}!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">computer</span><span class="p">])</span>
+    <span class="k">global</span> <span class="n">player_score</span><span class="p">,</span> <span class="n">computer_score</span>
+    <span class="k">if</span> <span class="n">player</span> <span class="o">==</span> <span class="n">computer</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s2">&quot;Tie game.&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rules</span><span class="p">[</span><span class="n">player</span><span class="p">]</span> <span class="o">==</span> <span class="n">computer</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s2">&quot;You Win.&quot;</span>
+            <span class="n">player_score</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s2">&quot;You Lose.&quot;</span>
+            <span class="n">computer_score</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This comparison also required the initialisation of the 'rules' dictionary which simply outlined which value would beat which. I have to admit that this particular method was largely gained from googling around for an elegant solution that didn't require a long series of if-else blocks with each combination in (this was my first solution).</p>
+<p>The final function was a simple printing of the scores at the end of the game. This took me longer than I care to admit as the variables did not have block level scope. This taught me a valuable lesson about how variables work in python.</p>
 
 </div>
 </div>
@@ -11794,26 +11861,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="My-Blog">My Blog<a class="anchor-link" href="#My-Blog">&#182;</a></h2><ul>
-<li><a href="posts/NHS Hackathon.html">NHS Hackathon</a> - 06.12.2017 </li>
-<li><a href="posts/Cancer_Detection_Notebook.html">KNN Cancer Detection</a> - 22.11.2017 </li>
-<li><a href="posts/FLT.html">Fermat's Last Theorem</a> - 30.07.2017 </li>
-<li><a href="posts/Rock_Paper_Scissors.html">Rock Paper Scissors</a> - 11.06.2017 </li>
-</ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Contact-Me">Contact Me<a class="anchor-link" href="#Contact-Me">&#182;</a></h2><ul>
-<li>Email: leojpedwards@gmail.com</li>
-<li>Github: <a href="https://github.com/leo-e-100">https://github.com/leo-e-100</a></li>
-<li>LinkedIn: <a href="https://www.linkedin.com/in/leo-edwards-5173aa127/">https://www.linkedin.com/in/leo-edwards-5173aa127/</a></li>
-<li>Twitter: @leojpedwards</li>
-</ul>
+<p><strong><a href="https://github.com/LEO-E-100/Rock-Paper-Scissors">Code Repo</a></strong></p>
 
 </div>
 </div>
