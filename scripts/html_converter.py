@@ -16,11 +16,11 @@ read_ga = open("google_analytics.txt","r").read()
 if read_navbar not in body:
     body = body.replace("<body>", "<body>\n" + read_navbar)
 
-if read_css not in body:
-    body = body.replace("</title>", "</title>\n" + read_css)
-
 if read_ga not in body:
     body = body.replace("</body", read_ga + "\n</body>")
+
+if read_css not in body:
+    body = body.replace("</title>", "</title>\n" + read_css)
 
 html_file = notebook_file.replace(".ipynb", ".html")
 html_file_writer = open(html_file, 'w')
