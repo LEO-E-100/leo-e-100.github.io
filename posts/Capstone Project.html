@@ -2,7 +2,7 @@
 <html>
 <head><meta charset="utf-8" />
 <title>Notebook</title>
-<link rel="stylesheet" href="assets/css/main.css" />
+<link rel="stylesheet" href="../assets/css/main.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
@@ -11772,9 +11772,9 @@ div#notebook {
 <body>
 <nav id="nav">
         <ul class="container">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="blog.html">Blog</a></li>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../blog.html">Blog</a></li>
         </ul>
 </nav>
 
@@ -11785,7 +11785,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Hi-there,-I'm-Leo!">Hi there, I'm Leo!<a class="anchor-link" href="#Hi-there,-I'm-Leo!">&#182;</a></h1><p>I'm a London based data scientist with a particular interest in Big Data and Computational Biology. <a href="about.html">Read More...</a></p>
+<h1 id="Capstone-Project">Capstone Project<a class="anchor-link" href="#Capstone-Project">&#182;</a></h1><p><em>14-12-2017</em></p>
 
 </div>
 </div>
@@ -11794,30 +11794,527 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="My-Blog">My Blog<a class="anchor-link" href="#My-Blog">&#182;</a></h2><ul>
-<li><a href="posts/Capstone Project.html">Capstone Project</a> - 14.12.2017</li>
-<li><a href="posts/NHS Hackathon.html">NHS Hackathon</a> - 06.12.2017 </li>
-<li><a href="posts/Cancer_Detection_Notebook.html">KNN Cancer Detection</a> - 22.11.2017 </li>
-<li><a href="posts/FLT.html">Fermat's Last Theorem</a> - 30.07.2017 </li>
-<li><a href="posts/Rock_Paper_Scissors.html">Rock Paper Scissors</a> - 11.06.2017 </li>
-</ul>
+<p>At General Assembly my last month of the course will be spent working on my 'Capstone' project, this is a project which will bring together all that I have learned and will hopefully be a successful project and will show my abilities.</p>
+<p>The idea that I have decided to follow is hopefully going to encompass many of my favourite data tools and principles. I wanted to have a 'Big Data' angle as well as a Natural Language Processing element.</p>
+<p>I settled on a project which would be in three parts.</p>
+<ol>
+<li>A web scraper that would grab the date, location, headline and content of news articles</li>
+<li>A script to run NLP analysis and cluster the articles</li>
+<li>Create a graph data structure of the information and clusters</li>
+<li>(Time Permitting) Use these clusters to predict future events</li>
+</ol>
+<p>It is clear that the quantity of data that will be produced by this is potentially enormous. I hope to scrape most BBC articles and Reuters articles in order to generate a dataset as large as possible. Data this large will likely not be runnable on my laptop. I will therefore have to combine Spark and AWS (I will have to research this further - perhaps Hadoop will be useful?)</p>
+<p>I have already created a basic test dataset of 10 articles which will be useful for running some proof of concept tests prior to Christmas. This will hopefully lead to validation of the principles on which I am working. The current code is laid out below with some basic comments added.</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Contact-Me">Contact Me<a class="anchor-link" href="#Contact-Me">&#182;</a></h2><ul>
-<li>Email: leojpedwards@gmail.com</li>
-<li>Github: <a href="https://github.com/leo-e-100">https://github.com/leo-e-100</a></li>
-<li>LinkedIn: <a href="https://www.linkedin.com/in/leo-edwards-5173aa127/">https://www.linkedin.com/in/leo-edwards-5173aa127/</a></li>
-<li>Twitter: @leojpedwards</li>
-</ul>
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Basic imports that have grown as the project went on </span>
+<span class="c1"># Useful for keeping track of dependcies</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">bs4</span>
+<span class="kn">import</span> <span class="nn">feedparser</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span> <span class="nn">scrapy.selector</span> <span class="kn">import</span> <span class="n">Selector</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+</pre></div>
 
 </div>
 </div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Test URL initially - if we can scrape one webpage, we can follow the same formula repeatedly</span>
+<span class="n">URL</span> <span class="o">=</span> <span class="s1">&#39;http://www.bbc.co.uk/news/uk-politics-42277040&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Basic web scraping flow</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+<span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">&#39;story-body&#39;</span><span class="p">)</span>
+<span class="n">test_result</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Extracting the Headline</span>
+<span class="n">headline</span> <span class="o">=</span> <span class="n">test_result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">&#39;story-body__h1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Extracting the date posted</span>
+<span class="n">date_posted</span> <span class="o">=</span> <span class="n">test_result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span> <span class="s1">&#39;date date--v2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Extracting the article text</span>
+<span class="n">article_text</span> <span class="o">=</span> <span class="n">test_result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span> <span class="s1">&#39;story-body__inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># The BBC has tags of related articles at the bottom of the article, this will extract them</span>
+<span class="n">tags_division</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">&#39;tags-container&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Create a list of all tags in the division</span>
+<span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tags_division</span><span class="p">)):</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">tags_division</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    <span class="n">temp_1</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_1</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Creating a data dictionary of the extracted data</span>
+<span class="c1"># allows the extracted data to be formed into a dataframe</span>
+<span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;headline&#39;</span> <span class="p">:</span> <span class="n">headline</span><span class="p">,</span>
+    <span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="n">date_posted</span><span class="p">,</span>
+    <span class="s1">&#39;tags&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="n">tags</span><span class="p">],</span>
+    <span class="s1">&#39;text&#39;</span> <span class="p">:</span> <span class="n">article_text</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Ultimately unused list of the column headings</span>
+<span class="n">column_heads</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;headline&#39;</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;tags&#39;</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># The final test dataframe</span>
+<span class="n">test_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_dict</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># BBC has an RSS feed which I can use to grab some articles</span>
+<span class="c1"># This cell will simply use it for headlines initially</span>
+<span class="n">feed</span> <span class="o">=</span> <span class="n">feedparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;http://feeds.bbci.co.uk/news/world/rss.xml&#39;</span><span class="p">)</span>
+<span class="n">headlines</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">feed</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">title</span>
+    <span class="n">headlines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">headlines</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[u&#34;Walt Disney buys Murdoch&#39;s Fox for $52.4bn&#34;, u&#34;Putin: Trump opponents harm US with &#39;invented&#39; Russia scandal&#34;, u&#34;Joe Biden comforts John McCain&#39;s daughter over cancer&#34;, u&#39;Niki Austrian airline failure strands many passengers&#39;, u&#34;Roy Moore says Alabama election &#39;tainted&#39; by outside groups&#34;, u&#39;EU leaders wrestle with migrant quotas at summit&#39;, u&#34;Zimbabwe&#39;s Mnangagwa seeks end to Western sanctions&#34;, u&#39;Somalia suicide bomber kills police at Mogadishu academy&#39;, u&#39;India happiness minister sought as murder suspect in Madhya Pradesh&#39;, u&#39;Bollywood star faces eviction from Paris apartment&#39;]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Using the methods above we can create a simple function which </span>
+<span class="c1"># will allow the scraping to become easier down the line</span>
+<span class="k">def</span> <span class="nf">scrape</span><span class="p">(</span><span class="n">URL</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">&#39;story-body&#39;</span><span class="p">)</span>
+    <span class="n">test_result</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">headline</span> <span class="o">=</span> <span class="n">test_result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">&#39;story-body__h1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">date_posted</span> <span class="o">=</span> <span class="n">test_result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span> <span class="s1">&#39;date date--v2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">article_text</span> <span class="o">=</span> <span class="n">test_result</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span> <span class="s1">&#39;story-body__inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+    
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">scrape_tags</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">headline</span><span class="p">,</span> <span class="n">date_posted</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">article_text</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Separate the slightly more complex tags scraping as this deserves its own function</span>
+<span class="c1"># This function is called within the larger scraping function</span>
+<span class="k">def</span> <span class="nf">scrape_tags</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">tags_division</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">&#39;tags-container&#39;</span><span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tags_division</span><span class="p">)):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">tags_division</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="n">temp_1</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tags</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Creating the dataframe is the final step - at this point this function doesn&#39;t work</span>
+<span class="k">def</span> <span class="nf">dataframify</span><span class="p">(</span><span class="n">dictionary</span><span class="p">):</span>
+    
+    <span class="n">column_heads</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_heads</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Testing that the function works</span>
+<span class="n">scrape</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[34]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(u&#34;Brexit: &#39;Breakthrough&#39; deal paves way for future trade talks&#34;,
+ u&#39;8 December 2017&#39;,
+ [[u&#39;Brexit&#39;, u&#39;DUP (Democratic Unionist Party)&#39;]],
+ u&#39;\n\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media captionThe prime minister said the deal will allow more to be invested in &#34;priorities at home&#34;\nPM Theresa May has struck a last-minute deal with the EU in a bid to move Brexit talks on to the next phase.There will be no &#34;hard border&#34; with Ireland; and the rights of EU citizens in the UK and UK citizens in the EU will be protected.The so-called &#34;divorce bill&#34; will amount to between \xa335bn and \xa339bn, Downing Street sources say.The European Commission president said it was a &#34;breakthrough&#34; and he was confident EU leaders will approve it.  \nBrexit deal as it happened\nFull text of the EU-UK statement\nKuenssberg: Theresa May buys breathing space\nSo, did \&#39;soft Brexit\&#39; just win?\nBrexitcast - EU deal special\nReality Check: What next for talks?\nThey are due to meet next Thursday for a European Council summit and need to give their backing to the deal if the next phase of negotiations are to begin.\n\n\n            /**/\n            (function() {\n                if (window.bbcdotcom &amp;&amp; bbcdotcom.adverts &amp;&amp; bbcdotcom.adverts.slotAsync) {\n                    bbcdotcom.adverts.slotAsync(\&#39;mpu\&#39;, [1,2,3]);\n                }\n            })();\n            /**/\n        \n\nTalks can then move onto a transition deal to cover a period of up to two years after Brexit, and the &#34;framework for the future relationship&#34; - preliminary discussions about a future trade deal, although the EU says a deal can only be finalised once the UK has left the EU. A final withdrawal treaty and transition deal will have to be ratified by the EU nations and the UK Parliament, before the UK leaves in March 2019. Northern Ireland\&#39;s Democratic Unionist Party, whose opposition on Monday led to talks breaking down,  said there was still &#34;more work to be done&#34; on the border issue and how it votes on the final deal &#34;will depend on its contents&#34;. Mrs May depends on the party\&#39;s support to win key votes in Westminster.The pound was trading at a six-month high against the euro as news broke of the draft agreement.What has been agreed?\nGuarantee that there will be &#34;no hard border&#34; between Northern Ireland and the Republic and that the &#34;constitutional and economic integrity of the United Kingdom&#34; will be maintained. \n\nEU citizens living in the UK and vice versa will have their rights to live, work and study protected.  The agreement includes reunification rights for relatives who do not live in the UK to join them in their host country in the future\n\nFinancial settlement - No specific figure is in the document but Downing Street sources say it will be between \xa335bn and \xa339bn, including budget contributions during a two-year &#34;transition&#34; period after March 2019\nBrexit: All you need to knowThe Irish border - the devil in the detailThe UK government and the EU want to maintain the free flow of goods, without border checks that they fear could threaten a return to The Troubles, but the DUP does not want Northern Ireland to be treated differently to the rest of the UK after Brexit.The joint EU-UK document says any future deal must protect &#34;North-South co-operation&#34; and hold to the UK\&#39;s &#34;guarantee of avoiding a hard border&#34;.The agreement also says &#34;no new regulatory barriers&#34; will be allowed between Northern Ireland and the rest of the UK, and that Northern Ireland\&#39;s businesses will continue to have &#34;unfettered access&#34; to the UK internal market - a passage thought to have been added to meet DUP concerns.But it also sets out a fallback position if the UK fails to agree a trade deal. This could prove controversial because it says there will continue to be &#34;full alignment&#34; between the EU and Northern Ireland on some elements of cross-border trade, as set out in the Good Friday Agreement.The DUP would have preferred this not to be in the agreement, says the BBC\&#39;s Chris Morris, and there could be some hard negotiating to do further down the line.\n\&#39;More Brexit work to be done\&#39; warns Foster\nWhat does Brexit deal mean for NI?\nWatching the Brexit deal unfold in Brussels\nCitizens\&#39; rights - same for everyone?Agreement has been reached on what happens to the three million EU citizens living in the UK and more than a million UK citizens in EU states after Brexit. EU citizens currently in the UK would be allowed to continue living and working there - and those already in the country who do not yet have permanent residency would be able to acquire it after Brexit. Freedom of movement could continue for two years after March 2019, although the UK says new arrivals will have to register.The plan is that UK citizens in living in an EU country would get the same rights, although they would not retain them if they moved to another EU country.For eight years after Brexit, UK courts will be able to refer cases involving EU nationals to the European Court of Justice for interpretation.But the campaign group the 3million, which represents EU citizens in the UK, said there was &#34;still no clarity around the registration criteria for these rights&#34; and said of the eight years: &#34;Our rights should not have an expiry date&#34;.Brexit: What now for EU citizens in the UK?The divorce bill - a figure at lastA figure is not mentioned in the text of the agreement but Downing Street sources says it will be between \xa335bn and \xa339bn.  It will be paid over four years and the precise figure is unlikely to be known for some time.EU Brexit negotiator Michel Barnier said the EU had agreed to drop the cost of relocating UK-based EU agencies from the final divorce bill.The prime minister said it would be &#34;fair to the British taxpayer&#34; and would mean the UK in future &#34;will be able to invest more in our priorities at home, such as housing, schools and the NHS&#34;.What happens next?Technically a future trade deal cannot be signed while the UK remains a member of the EU but &#34;preliminary and preparatory discussions&#34; can begin.But the EU\&#39;s chief Brexit negotiator Michel Barnier has said the withdrawal treaty and transition deal need to be ready by October 2018 - in order that they can be ratified by March 2019, before the &#34;real negotiation&#34; begins on the future relationship. Mr Barnier suggested on Friday that the only option for a future trade arrangement was a Canada-style deal, rather than a one based on Norway, which retains free movement and unrestricted access to the single market but pays into the EU budget.The European Council wants the UK to remain a &#34;member&#34; of the EU\&#39;s customs union and single market and to remain under the full jurisdiction of the European Court of Justice during the transition period, according to a leaked document. What has changed since Monday?\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media captionDUP leader Arlene Foster welcomes &#34;no red line down the Irish Sea&#34;\nThe DUP, whose opposition on Monday led to talks breaking down, say there have been six &#34;substantial changes&#34; to the text. Party leader Arlene Foster said they would mean there was &#34;no red line down the Irish Sea&#34; - meaning no customs barrier between Northern Ireland and the rest of the UK. But BBC Northern Ireland economics editor John Campbell says there is a lot of hard negotiating to come and compromises to be made.Another interpretation of the deal is that that it still leaves the door open for a special status for Northern Ireland, he adds.What does Brexit deal mean for NI?\n\n\n\nBBC political editor Laura Kuenssberg\&#39;s analysisThe prime minister made her decisions on Thursday night while the No 10 Downing Street Christmas party carried on.It isn\&#39;t celebration on Friday though for her government, but relief.Read more from Laura\n\n\n\nHow has it been received?\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media captionIreland\&#39;s Taoiseach Leo Varadkar: &#34;This is not the end but it is the end of the beginning&#34;\nTheresa May\&#39;s cabinet colleagues heaped praise on her, with Environment Secretary Michael Gove saying it was a &#34;significant personal political achievement&#34; for Mrs May while Foreign Secretary Boris Johnson tweeted: &#34;Congratulations to PM for her determination in getting today\&#39;s deal.&#34;But Labour\&#39;s Brexit spokesman Sir Keir Starmer said Mrs May should &#34;seriously reflect on her approach to the negotiations so far&#34;.He added: &#34;Despite being two months later than originally planned, it is encouraging that the European Commission has recommended sufficient progress in the Brexit negotiations.&#34;European press relieved at Brexit \&#39;white smoke\&#39;\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media captionJeremy Corbyn: &#34;My party stands for a completely different future when we leave the EU&#34;\n\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media captionBritain will pay &#34;an extravagant sum of money we don\&#39;t owe&#34; and leave it unable to make its own trade deal, says Nigel Farage\nDUP Leader Arlene Foster said it meant that Northern Ireland would &#34;not be separated constitutionally, politically, economically or regulatory from the rest of the United Kingdom&#34; and &#34;in all circumstances the United Kingdom will continue to ensure the same unfettered access for Northern Ireland\&#39;s businesses to the whole of the UK internal market&#34;.Scotland\&#39;s First Minister Nicola Sturgeon tweeted: &#34;Move to phase 2 of talks is good - but the devil is in the detail and things now get really tough.&#34;Lib Dem leader Vince Cable, who backs a referendum on the final deal, said &#34;it reduces the risk of a catastrophic no-deal Brexit&#34; but questioned if it would last or be &#34;torn apart by Theresa May\&#39;s own MPs&#34;.  Former UKIP leader Nigel Farage told the BBC the estimated bill was &#34;way more than we need to pay&#34; and he was unhappy that the European Court of Justice would continue to have a role for up to eight years. &#34;The whole thing is humiliating. We have collapsed at every level.&#34;\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media caption&#34;No champagne&#34; for the Brexit negotiators, who &#34;have to drink water&#34;\n\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media captionJean-Claude Juncker: &#34;Sufficient progress&#34; will see Brexit trade talks begin\n\n\n\nMedia playback is unsupported on your device\n\n\n\n\n\n Media captionTusk: \&#39;Breaking up is hard, building a new relationship is harder\&#39;\n\n&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Using the function requires a useful RSS feeder function to set up the RSS feed</span>
+<span class="n">RSS_URL</span> <span class="o">=</span> <span class="s1">&#39;http://feeds.bbci.co.uk/news/world/rss.xml&#39;</span>
+
+<span class="k">def</span> <span class="nf">RSS_reader</span><span class="p">(</span><span class="n">URL</span><span class="p">):</span>
+    <span class="n">feed</span> <span class="o">=</span> <span class="n">feedparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+    <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feed</span><span class="o">.</span><span class="n">entries</span><span class="p">)):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">feed</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">link</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">links</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="n">links</span> <span class="o">=</span> <span class="n">RSS_reader</span><span class="p">(</span><span class="n">RSS_URL</span><span class="p">)</span>
+<span class="n">new_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">links</span><span class="p">]</span>
+<span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_links</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>30
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">column_heads</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">link</span>
+    <span class="k">print</span> <span class="n">new_links</span><span class="p">[</span><span class="n">link</span><span class="p">]</span>
+    <span class="n">temp_headline</span><span class="p">,</span> <span class="n">temp_date_posted</span><span class="p">,</span> <span class="n">temp_tags</span><span class="p">,</span> <span class="n">temp_article_text</span> <span class="o">=</span> <span class="n">scrape</span><span class="p">(</span><span class="n">new_links</span><span class="p">[</span><span class="n">link</span><span class="p">])</span>
+
+    <span class="n">temp_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">temp_headline</span><span class="p">,</span> <span class="n">temp_date_posted</span><span class="p">,</span> <span class="n">temp_tags</span><span class="p">,</span> <span class="n">temp_article_text</span><span class="p">]</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_list</span>
+
+<span class="c1"># df.set_value(temp_headline, temp_date_posted, temp_tags, temp_article_text)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0
+http://www.bbc.co.uk/news/business-42353545
+1
+http://www.bbc.co.uk/news/world-europe-42349906
+2
+http://www.bbc.co.uk/news/world-us-canada-42351576
+3
+http://www.bbc.co.uk/news/world-europe-42355776
+4
+http://www.bbc.co.uk/news/world-us-canada-42346121
+5
+http://www.bbc.co.uk/news/world-europe-42352876
+6
+http://www.bbc.co.uk/news/world-africa-42358058
+7
+http://www.bbc.co.uk/news/world-asia-42356797
+8
+http://www.bbc.co.uk/news/world-africa-42350072
+9
+http://www.bbc.co.uk/news/world-asia-india-42349711
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[66]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>headline</th>
+      <th>date</th>
+      <th>tags</th>
+      <th>text</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Walt Disney buys Murdoch's Fox for $52.4bn</td>
+      <td>14 December 2017</td>
+      <td>[Disney]</td>
+      <td>\n\n\n\nImage copyright\nDisney\n\n\nImage cap...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Putin: Trump opponents harm US with 'invented'...</td>
+      <td>14 December 2017</td>
+      <td>[Russia-Trump inquiry, Russia]</td>
+      <td>\n\n\n\nImage copyright\nReuters\n\n\nImage ca...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Joe Biden comforts John McCain's daughter over...</td>
+      <td>14 December 2017</td>
+      <td>[Cancer]</td>
+      <td>\n\n\n\nImage copyright\nReuters\n\n\nImage ca...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Niki Austrian airline failure strands many pas...</td>
+      <td>14 December 2017</td>
+      <td>[Austria]</td>
+      <td>\n\n\n\nImage copyright\nAFP\n\n\nImage captio...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Roy Moore says Alabama election 'tainted' by o...</td>
+      <td>14 December 2017</td>
+      <td>[Roy Moore]</td>
+      <td>\n\n\n\nImage copyright\nReuters\n\n\nImage ca...</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
 </div>
     </div>
   </div>
