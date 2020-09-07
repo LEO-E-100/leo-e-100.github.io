@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>User Generated Outcomes | Promethean Blog</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="User Generated Outcomes" />
+<meta name="author" content="Leo" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Building a hypothetical app for NHS 111 follow up" />
+<meta property="og:description" content="Building a hypothetical app for NHS 111 follow up" />
+<link rel="canonical" href="https://github.promethean.dev/2018/01/24/ugo.html" />
+<meta property="og:url" content="https://github.promethean.dev/2018/01/24/ugo.html" />
+<meta property="og:site_name" content="Promethean Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-01-24T00:00:00+00:00" />
+<script type="application/ld+json">
+{"headline":"User Generated Outcomes","dateModified":"2018-01-24T00:00:00+00:00","datePublished":"2018-01-24T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://github.promethean.dev/2018/01/24/ugo.html"},"author":{"@type":"Person","name":"Leo"},"url":"https://github.promethean.dev/2018/01/24/ugo.html","description":"Building a hypothetical app for NHS 111 follow up","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://github.promethean.dev/feed.xml" title="Promethean Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Promethean Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog.html">Blog</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">User Generated Outcomes</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2018-01-24T00:00:00+00:00" itemprop="datePublished">Jan 24, 2018
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">Leo</span></span></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="introduction">Introduction</h2>
+
+<p>During the 3 months I worked with NHS Digital and Joseph Connor I focussed on one particular problem within the NHS and in particular in finding a technological solution. The problem can be easily described in a single sentence.</p>
+
+<blockquote>
+  <p>It is not currently possible to follow up NHS interactions in order to classify outcomes.</p>
+</blockquote>
+
+<p>This may seem like a very basic function for any institution to carry out in order to validate the work that they do. However it has not been a priority for the NHS. I began the project looking at how other industries have solved this problem.</p>
+
+<p>An initial idea was to use a similar technology to the ‘Happy or Not’ bots. It was quickly decided that these would be highly impractical to install in every hospital, GP and other frontline NHS services. However a technological solution could be found which would operate in a similar way.</p>
+
+<h2 id="nhs-111">NHS 111</h2>
+
+<p>The target for a proof of concept for such a technology was chosen as the NHS 111 service. It became clear after an extensive literature review that there is little to no follow up to NHS 111 calls. After a call has been made and a disposition reached by following the highly structured system for the call.</p>
+
+<p>A follow up to the call would be valuable for a number of reasons, the most important of which is that it would provide vital data to validate and potentially improve the service provided by the NHS for the 111 calls.</p>
+
+<p>Furthermore a service of follow up is useful as a service to the user since it could include important information which would be helpful (it was decided that a google maps link would be useful)</p>
+
+<h2 id="the-project">The project</h2>
+
+<p>Thus it was decided that the project would involve the mapping out of this service and implementing a proof of concept which would be useful for demonstrating how the service works and how it could be of benefit to the overall NHS infrastructure.</p>
+
+<p>After many iterations the system was mapped out. The image below demonstrates how the system would work in theory.</p>
+
+<p><img src="../img/User Journey - Activity Diagram.png" alt="title" /></p>
+
+<h3 id="the-app">The app</h3>
+
+<p>The next step was to build this system as an app that could demonstrate its power. For this a flask web app was chosen as the best technology. JavaScript would be used for client side code while the backend would be a REST service built with Flask.</p>
+
+<h3 id="google-maps-api">Google Maps API</h3>
+
+<p>The first step was to design a method of displaying google maps links in a browser using the google maps API. In particular it was a complex business of using the NHS service ID to pin point the actual location. However by scraping the NHS choices site it was found that a database of service IDs included the longitude and latitude which would allow the flask app to find it using REST.</p>
+
+<h3 id="a-rating-page">A Rating Page</h3>
+
+<p>Next it was important to design the feedback page. This involved some complex JavaScript to give an aesthetically pleasing landing page for providing ratings as well as conveying the anonymimity that the user would have.</p>
+
+<h3 id="twilio-text-messaging-service">Twilio Text Messaging Service</h3>
+
+<p>Adding in the SMS functionality involved the use of Twilio which has a Python API and is used for sending SMS messages from a pre determined number. Adding in the functionality meant setting up a callable script which would then be utilised by the Flask app.</p>
+
+<h3 id="database-backend">Database Backend</h3>
+
+<p>One of the most important steps in the process is storing the gathered data. This was also one of the most inexplicably complex steps. Initially adding an SQLite database appeared a trivial step and adding the ratings simply a matter of adding a single SQL statement to the Flask app. However after 2 weeks of trying it was found to be impossible to send data to the database from the Flask app. A question was asked on <a href="https://stackoverflow.com/questions/45567007/sqlite-and-flask-insert-statement-error">StackOverflow</a> which remains unanswered 5 months later.</p>
+
+<p>After this unexplained failure a decision was taken to instead use a NoSQL solution and apply a Google Firebase database to the problem. This stored data as a JSON file and could be structured in a similar fashion to the SQLite database.</p>
+
+<h3 id="deployment">Deployment</h3>
+
+<p>Unfortunately time constraints limited the deployment of the app prior to its reveal to the NHS. This meant that its demonstrating value was limited. A deployment to Amazon Web Services appears to be the simplest at this point and will hopefully happen at some point. Thus giving the overall project its demonstration power.</p>
+
+<h3 id="code-repo"><a href="https://github.com/mattstibbs/nhshd-service-api/tree/Firebase">Code Repo</a></h3>
+
+  </div><a class="u-url" href="/2018/01/24/ugo.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Promethean Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Leo Edwards</li><li><a class="u-email" href="mailto:leojpedwards@gmail.com">leojpedwards@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/leo-e-100"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">leo-e-100</span></a></li><li><a href="https://www.twitter.com/leojpedwards"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">leojpedwards</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A place to keep my thoughts and projects</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

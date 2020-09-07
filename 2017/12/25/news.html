@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Custom News App | Promethean Blog</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Custom News App" />
+<meta name="author" content="Leo" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Building a Custom news feed based on previous sentiment" />
+<meta property="og:description" content="Building a Custom news feed based on previous sentiment" />
+<link rel="canonical" href="https://github.promethean.dev/2017/12/25/news.html" />
+<meta property="og:url" content="https://github.promethean.dev/2017/12/25/news.html" />
+<meta property="og:site_name" content="Promethean Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2017-12-25T00:00:00+00:00" />
+<script type="application/ld+json">
+{"headline":"Custom News App","dateModified":"2017-12-25T00:00:00+00:00","datePublished":"2017-12-25T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://github.promethean.dev/2017/12/25/news.html"},"author":{"@type":"Person","name":"Leo"},"url":"https://github.promethean.dev/2017/12/25/news.html","description":"Building a Custom news feed based on previous sentiment","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://github.promethean.dev/feed.xml" title="Promethean Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Promethean Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog.html">Blog</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Custom News App</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2017-12-25T00:00:00+00:00" itemprop="datePublished">Dec 25, 2017
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">Leo</span></span></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="building-a-custom-news-feed">Building A Custom News Feed</h1>
+
+<p>Principle is to build an email service app that will deliver a daily email with 5 recommended articles based on what articles are in a persons pocket account (labelled dataset). This will initally mean creating a model based on data pulled from pocket using the API. Laterly this will mean creating a service that will pull news from RSS feeds and testing them against the model to find top recommendations. Then creating a second service that will send out automatic emails with recommended articles.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">config</span>
+<span class="n">pd</span><span class="p">.</span><span class="n">set_option</span><span class="p">(</span><span class="s">'display.max_colwidth'</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="creating-supervised-dataset">Creating supervised dataset</h2>
+
+<p>Using the Pocket API to create the initial dataset. Having curated a dataset by adding ~200 articles to pocket and tagged them with ‘y’ or ‘n’ depending on whether the user is interested in the article. Ultimately this will give a dataframe of article urls and a label of whether the user is interested or not.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># API authorisation. Once Access Key is known no need to re-run.
+</span><span class="n">auth_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">'consumer_key'</span> <span class="p">:</span> <span class="n">config</span><span class="p">.</span><span class="n">consumer_key</span><span class="p">,</span> 
+    <span class="s">'redirect_uri'</span> <span class="p">:</span> <span class="s">'https://twitter.com/leojpedwards'</span>
+<span class="p">}</span>
+<span class="n">tkn</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="s">'https://getpocket.com/v3/oauth/request'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">auth_params</span><span class="p">)</span>
+<span class="n">string_tkn</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tkn</span><span class="p">.</span><span class="n">content</span><span class="p">)</span>
+<span class="n">split_tkn</span> <span class="o">=</span> <span class="n">string_tkn</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">'='</span><span class="p">)[</span><span class="mi">1</span><span class="p">].</span><span class="n">replace</span><span class="p">(</span><span class="s">'</span><span class="se">\'</span><span class="s">'</span><span class="p">,</span> <span class="s">''</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">usr_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">'consumer_key'</span> <span class="p">:</span> <span class="n">config</span><span class="p">.</span><span class="n">consumer_key</span><span class="p">,</span> 
+    <span class="s">'code'</span> <span class="p">:</span> <span class="n">split_tkn</span>
+<span class="p">}</span>
+<span class="n">usr</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="s">'https://getpocket.com/v3/oauth/authorize'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">usr_params</span><span class="p">)</span>
+<span class="n">usr</span><span class="p">.</span><span class="n">content</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">no_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">'consumer_key'</span> <span class="p">:</span> <span class="n">config</span><span class="p">.</span><span class="n">consumer_key</span><span class="p">,</span>
+    <span class="s">'access_token'</span> <span class="p">:</span> <span class="n">config</span><span class="p">.</span><span class="n">access_token</span><span class="p">,</span>
+    <span class="s">'tag'</span> <span class="p">:</span> <span class="s">'n'</span>
+<span class="p">}</span>
+<span class="n">no_result</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="s">'https://getpocket.com/v3/get'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">no_params</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">no_json</span> <span class="o">=</span> <span class="n">no_result</span><span class="p">.</span><span class="n">json</span><span class="p">()</span>
+<span class="n">no_list</span> <span class="o">=</span> <span class="n">no_json</span><span class="p">[</span><span class="s">'list'</span><span class="p">]</span>
+<span class="n">no_urls</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">no_list</span><span class="p">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="n">no_urls</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'resolved_url'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">no_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">no_urls</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">'urls'</span><span class="p">])</span>
+<span class="n">no_df</span> <span class="o">=</span> <span class="n">no_df</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">wanted</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s">'n'</span><span class="p">)</span>
+<span class="n">no_df</span><span class="p">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">yes_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">'consumer_key'</span> <span class="p">:</span> <span class="n">config</span><span class="p">.</span><span class="n">consumer_key</span><span class="p">,</span>
+    <span class="s">'access_token'</span> <span class="p">:</span> <span class="n">config</span><span class="p">.</span><span class="n">access_token</span><span class="p">,</span>
+    <span class="s">'tag'</span> <span class="p">:</span> <span class="s">'y'</span>
+<span class="p">}</span>
+<span class="n">yes_result</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="s">'https://getpocket.com/v3/get'</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">yes_params</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">yes_json</span> <span class="o">=</span> <span class="n">yes_result</span><span class="p">.</span><span class="n">json</span><span class="p">()</span>
+<span class="n">yes_list</span> <span class="o">=</span> <span class="n">no_json</span><span class="p">[</span><span class="s">'list'</span><span class="p">]</span>
+<span class="n">yes_urls</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">yes_list</span><span class="p">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="n">yes_urls</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'resolved_url'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">yes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">yes_urls</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">'urls'</span><span class="p">])</span>
+<span class="n">yes_df</span> <span class="o">=</span> <span class="n">yes_df</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">wanted</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s">'y'</span><span class="p">)</span>
+<span class="n">yes_df</span><span class="p">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span><span class="n">yes_df</span><span class="p">,</span> <span class="n">no_df</span><span class="p">])</span>
+<span class="n">df</span><span class="p">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="scraping-article-content">Scraping article content</h2>
+
+<p>Once the URLs have been recovered it is necessary to scrape the text from these articles in order to carry out the NLP steps. This requires the use of scraping on a number of different web sources. This would be a time consuming process if I were to write a bespoke web scraper for each website. Therefore I decided to use an link embedding service with an api to query. Initially I tried to use embed.ly however this is now a very expensive paid service. I instead have used embed.rocks. This is tested below and applied to the whole list of article URLs from above.</p>
+
+<p>Once the raw HTML has been extracted from the API, it was necessary to add just the text as a new column which is done using BeautifulSoup.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s">'lxml'</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">soup</span><span class="p">.</span><span class="n">get_text</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">text</span>
+<span class="n">df</span><span class="p">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s">'text'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s">'html'</span><span class="p">].</span><span class="nb">map</span><span class="p">(</span><span class="n">get_text</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df</span><span class="p">.</span><span class="n">shape</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(154, 4)
+</code></pre></div></div>
+
+<h2 id="natural-language-processing">Natural Language Processing</h2>
+
+<p>From the text column it is possible to call a vectorizer in order to turn the text data into a usable matrix format for Machine Learning.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">TfidfVectorizer</span>
+<span class="n">vect</span> <span class="o">=</span> <span class="n">TfidfVectorizer</span><span class="p">(</span><span class="n">ngram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">stop_words</span><span class="o">=</span><span class="s">'english'</span><span class="p">,</span> <span class="n">min_df</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">vector_matrix</span> <span class="o">=</span> <span class="n">vect</span><span class="p">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s">'text'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">vector_matrix</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;154x2906 sparse matrix of type '&lt;class 'numpy.float64'&gt;'
+	with 19228 stored elements in Compressed Sparse Row format&gt;
+</code></pre></div></div>
+
+<h2 id="support-vector-machines">Support Vector Machines</h2>
+
+<p>Building a Support Vector Machine model from the vectorised data. This step will require some evaluation of the quality of the model which has not yet been done as initially it was thought that the iterative process would ensure that the model was effective.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">LinearSVC</span><span class="p">,</span> <span class="n">SVC</span>
+<span class="n">clf</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">()</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">clf</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">vector_matrix</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="s">'wanted'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span> <span class="o">=</span> <span class="n">vector_matrix</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s">'wanted'</span><span class="p">]</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"C"</span> <span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="s">"kernel"</span> <span class="p">:</span> <span class="p">[</span><span class="s">'rbf'</span><span class="p">],</span>
+    <span class="s">"gamma"</span> <span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">gridSearch</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">gridSearch</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Fitting 5 folds for each of 10 candidates, totalling 50 fits
+
+
+[Parallel(n_jobs=1)]: Done  50 out of  50 | elapsed:    0.8s finished
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span> <span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">best_params_</span><span class="p">)</span>
+<span class="n">best_model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">best_estimator_</span>
+<span class="n">best</span> <span class="o">=</span> <span class="n">best_model</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">best</span><span class="p">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="k">print</span> <span class="p">(</span><span class="s">'Score:</span><span class="se">\t</span><span class="s">'</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{'kernel': 'rbf', 'C': 1, 'gamma': 0.0}
+Score:	 0.358974358974359
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">params_2</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"C"</span> <span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s">"kernel"</span> <span class="p">:</span> <span class="p">[</span><span class="s">'linear'</span><span class="p">,</span> <span class="s">'poly'</span><span class="p">,</span> <span class="s">'rbf'</span><span class="p">],</span>
+    <span class="s">"gamma"</span> <span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">gridSearch</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">params_2</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">model_2</span> <span class="o">=</span> <span class="n">gridSearch</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Fitting 5 folds for each of 300 candidates, totalling 1500 fits
+
+
+[Parallel(n_jobs=-1)]: Done 176 tasks      | elapsed:    0.7s
+[Parallel(n_jobs=-1)]: Done 1500 out of 1500 | elapsed:    4.0s finished
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span> <span class="p">(</span><span class="n">model_2</span><span class="p">.</span><span class="n">best_params_</span><span class="p">)</span>
+<span class="n">best_model_2</span> <span class="o">=</span> <span class="n">model_2</span><span class="p">.</span><span class="n">best_estimator_</span>
+<span class="n">best_2</span> <span class="o">=</span> <span class="n">best_model_2</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">score_2</span> <span class="o">=</span> <span class="n">best_2</span><span class="p">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="k">print</span> <span class="p">(</span><span class="s">'Score:</span><span class="se">\t</span><span class="s">'</span><span class="p">,</span> <span class="n">score_2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{'kernel': 'linear', 'C': 0.001, 'gamma': 1e-05}
+Score:	 0.358974358974359
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">clf_2</span> <span class="o">=</span> <span class="n">LinearSVC</span><span class="p">()</span>
+
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"penalty"</span> <span class="p">:</span> <span class="p">[</span><span class="s">'l2'</span><span class="p">],</span>
+    <span class="s">"loss"</span> <span class="p">:</span> <span class="p">[</span><span class="s">'hinge'</span><span class="p">,</span> <span class="s">'squared_hinge'</span><span class="p">],</span>
+    <span class="s">"C"</span> <span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">gridSearch</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">clf_2</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">model_3</span> <span class="o">=</span> <span class="n">gridSearch</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Fitting 5 folds for each of 20 candidates, totalling 100 fits
+
+
+[Parallel(n_jobs=1)]: Done 100 out of 100 | elapsed:    0.6s finished
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span> <span class="p">(</span><span class="n">model_3</span><span class="p">.</span><span class="n">best_params_</span><span class="p">)</span>
+<span class="n">best_model_3</span> <span class="o">=</span> <span class="n">model_3</span><span class="p">.</span><span class="n">best_estimator_</span>
+<span class="n">best_3</span> <span class="o">=</span> <span class="n">best_model_3</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">score_3</span> <span class="o">=</span> <span class="n">best_3</span><span class="p">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="k">print</span> <span class="p">(</span><span class="s">'Score:</span><span class="se">\t</span><span class="s">'</span><span class="p">,</span> <span class="n">score_3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{'C': 0.001, 'penalty': 'l2', 'loss': 'hinge'}
+Score:	 0.358974358974359
+</code></pre></div></div>
+
+<h3 id="test-gspread-credentials">Test Gspread credentials</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">gspread</span>
+<span class="kn">from</span> <span class="nn">oauth2client.service_account</span> <span class="kn">import</span> <span class="n">ServiceAccountCredentials</span>
+
+<span class="n">json_file</span> <span class="o">=</span> <span class="s">'Custom News Feed-d7876b12a476.json'</span>
+
+<span class="n">scope</span> <span class="o">=</span> <span class="p">[</span><span class="s">'https://spreadsheets.google.com/feeds'</span><span class="p">]</span>
+
+<span class="n">credentials</span> <span class="o">=</span> <span class="n">ServiceAccountCredentials</span><span class="p">.</span><span class="n">from_json_keyfile_name</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+
+<span class="n">connection</span> <span class="o">=</span> <span class="n">gspread</span><span class="p">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">credentials</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">NF_file</span> <span class="o">=</span> <span class="n">connection</span><span class="p">.</span><span class="nb">open</span><span class="p">(</span><span class="s">'NewsFeed'</span><span class="p">)</span>
+<span class="n">NF_sheet</span> <span class="o">=</span> <span class="n">NF_file</span><span class="p">.</span><span class="n">sheet1</span>
+<span class="n">NF_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">NF_sheet</span><span class="p">.</span><span class="n">col_values</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">NF_sheet</span><span class="p">.</span><span class="n">col_values</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">NF_sheet</span><span class="p">.</span><span class="n">col_values</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span>
+<span class="n">articles_df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">NF_list</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">'title'</span><span class="p">,</span> <span class="s">'urls'</span><span class="p">,</span> <span class="s">'html'</span><span class="p">])</span>
+<span class="n">articles_df</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">''</span><span class="p">,</span> <span class="n">pd</span><span class="p">.</span><span class="n">np</span><span class="p">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">articles_df</span><span class="p">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">articles_df</span><span class="p">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">articles_df</span><span class="p">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s">'text'</span><span class="p">]</span> <span class="o">=</span> <span class="n">articles_df</span><span class="p">[</span><span class="s">'html'</span><span class="p">].</span><span class="nb">map</span><span class="p">(</span><span class="n">get_text</span><span class="p">)</span> 
+<span class="n">articles_df</span><span class="p">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">test_matrix</span> <span class="o">=</span> <span class="n">vect</span><span class="p">.</span><span class="n">transform</span><span class="p">(</span><span class="n">articles_df</span><span class="p">[</span><span class="s">'text'</span><span class="p">])</span>
+<span class="n">test_matrix</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;5x2873 sparse matrix of type '&lt;class 'numpy.float64'&gt;'
+	with 42 stored elements in Compressed Sparse Row format&gt;
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_matrix</span><span class="p">),</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s">'wanted'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">results</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>wanted</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>n</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>y</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>y</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>y</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>y</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rez</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">merge</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">articles_df</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">rez</span>
+</code></pre></div></div>
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>wanted</th>
+      <th>title</th>
+      <th>urls</th>
+      <th>html</th>
+      <th>text</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>n</td>
+      <td>The Pogues frontman's star-studded 60th birthday</td>
+      <td>http://www.bbc.co.uk/news/world-europe-42701430</td>
+      <td>The man who brought punk and Irish folk together, turned 60 with a star-studded concert.</td>
+      <td>The man who brought punk and Irish folk together, turned 60 with a star-studded concert.</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>y</td>
+      <td>John Worboys: Rapist's jail move bid refused in 2015</td>
+      <td>http://www.bbc.co.uk/news/uk-42700475</td>
+      <td>Parole Board confirms it denied open jail transfer two years before ruling it was safe to free rapist.</td>
+      <td>Parole Board confirms it denied open jail transfer two years before ruling it was safe to free rapist.</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>y</td>
+      <td>Syrian opposition calls on Trump and EU to put pressure on Russia and Iran</td>
+      <td>http://www.reuters.com/article/us-mideast-crisis-syria-opposition/syrian-opposition-calls-on-trump-and-eu-to-put-pressure-on-russia-and-iran-idUSKBN1F51LO?feedType=RSS&amp;feedName=worldNews</td>
+      <td>LONDON (Reuters) - U.S. President Donald Trump and European Union leaders should increase the pressure on President Bashar al-Assad and his allies Russia and Iran to return to talks to end Syria's...</td>
+      <td>LONDON (Reuters) - U.S. President Donald Trump and European Union leaders should increase the pressure on President Bashar al-Assad and his allies Russia and Iran to return to talks to end Syria's...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>y</td>
+      <td>Does MP Sir Desmond Swayne nod off in Ken Clarke's speech?</td>
+      <td>http://www.bbc.co.uk/news/uk-politics-42708212</td>
+      <td>Does MP Sir Desmond Swayne nod off during Ken Clarke's speech on the EU Withdrawal Bill?</td>
+      <td>Does MP Sir Desmond Swayne nod off during Ken Clarke's speech on the EU Withdrawal Bill?</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>y</td>
+      <td>England's first 'prisoner of war' discovered</td>
+      <td>http://www.bbc.co.uk/news/education-42690437</td>
+      <td>A French aristocrat, captured in 1357, was England's earliest official "prisoner of war", say historians.</td>
+      <td>A French aristocrat, captured in 1357, was England's earliest official "prisoner of war", say historians.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="tune-the-model">Tune the Model</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Hypothetical correction method
+</span><span class="n">change_to_no</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+
+<span class="n">change_to_yes</span> <span class="o">=</span> <span class="p">[]</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">rez</span><span class="p">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">change_to_yes</span><span class="p">].</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">rez</span><span class="p">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">'wanted'</span><span class="p">]</span> <span class="o">=</span> <span class="s">'y'</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">rez</span><span class="p">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">change_to_no</span><span class="p">].</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">rez</span><span class="p">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">'wanted'</span><span class="p">]</span> <span class="o">=</span> <span class="s">'n'</span>
+<span class="n">rez</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">combined</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">[[</span><span class="s">'wanted'</span><span class="p">,</span> <span class="s">'text'</span><span class="p">]],</span> <span class="n">rez</span><span class="p">[[</span><span class="s">'wanted'</span><span class="p">,</span> <span class="s">'text'</span><span class="p">]]])</span>
+<span class="n">combined</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Rebuild model with new data
+</span><span class="n">tvcomb</span> <span class="o">=</span> <span class="n">vect</span><span class="p">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">combined</span><span class="p">[</span><span class="s">'text'</span><span class="p">],</span> <span class="n">combined</span><span class="p">[</span><span class="s">'wanted'</span><span class="p">])</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">clf</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">tvcomb</span><span class="p">,</span> <span class="n">combined</span><span class="p">[</span><span class="s">'wanted'</span><span class="p">])</span>
+<span class="c1"># Iterate this process
+</span></code></pre></div></div>
+
+<h3 id="output-the-model-to-pickle">Output the Model to Pickle</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="n">pickle</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s">r'news_model_pickle.pkl'</span><span class="p">,</span> <span class="s">'wb'</span><span class="p">))</span>
+<span class="n">pickle</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">vect</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s">r'news_vect_pickle.pkl'</span><span class="p">,</span> <span class="s">'wb'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2 id="todo">TODO</h2>
+
+<ul>
+  <li><del>Add news article to supervised dataset</del></li>
+  <li><del>More articles in supervised dataset</del></li>
+  <li>Flask web app</li>
+  <li><del>Add config variables to config file</del></li>
+  <li>Score top articles rather than simple yes/no</li>
+  <li>Setup script for email service</li>
+</ul>
+
+  </div><a class="u-url" href="/2017/12/25/news.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Promethean Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Leo Edwards</li><li><a class="u-email" href="mailto:leojpedwards@gmail.com">leojpedwards@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/leo-e-100"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">leo-e-100</span></a></li><li><a href="https://www.twitter.com/leojpedwards"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">leojpedwards</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A place to keep my thoughts and projects</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

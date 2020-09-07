@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>KNN Cancer Detection | Promethean Blog</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="KNN Cancer Detection" />
+<meta name="author" content="Leo" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Building a Cancer Scan image classifier" />
+<meta property="og:description" content="Building a Cancer Scan image classifier" />
+<link rel="canonical" href="https://github.promethean.dev/2017/11/22/KNN.html" />
+<meta property="og:url" content="https://github.promethean.dev/2017/11/22/KNN.html" />
+<meta property="og:site_name" content="Promethean Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2017-11-22T00:00:00+00:00" />
+<script type="application/ld+json">
+{"headline":"KNN Cancer Detection","dateModified":"2017-11-22T00:00:00+00:00","datePublished":"2017-11-22T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://github.promethean.dev/2017/11/22/KNN.html"},"author":{"@type":"Person","name":"Leo"},"url":"https://github.promethean.dev/2017/11/22/KNN.html","description":"Building a Cancer Scan image classifier","@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://github.promethean.dev/feed.xml" title="Promethean Blog" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Promethean Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog.html">Blog</a><a class="page-link" href="/">Home</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">KNN Cancer Detection</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2017-11-22T00:00:00+00:00" itemprop="datePublished">Nov 22, 2017
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">Leo</span></span></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This was a project that grew out of my studies at GA. After learning about K nearest neighbours and finding the wisconsin breast cancer <a href="https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/">dataset</a> I thought I would apply what I learned to a real life scenario. What follows is the full code from that idea.</p>
+
+<p>Usually I will just insert the most interesting bits of code but in this case I wanted to display my full thinking as clearly as possible. I have tried to document as I go along and make my expression as simple as possible to understand.</p>
+
+<p>Primarily I have focussed on the evaluation of the model produced using a variety of tools such as the classification report and the ROC curve.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="n">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">auc</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">np</span><span class="p">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="n">use</span><span class="p">(</span><span class="s">'fivethirtyeight'</span><span class="p">)</span>
+
+<span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">'id'</span><span class="p">,</span>
+                <span class="s">'clump_thickness'</span><span class="p">,</span>
+                <span class="s">'cell_size_uniformity'</span><span class="p">,</span>
+                <span class="s">'cell_shape_uniformity'</span><span class="p">,</span>
+                <span class="s">'marginal_adhesion'</span><span class="p">,</span>
+                <span class="s">'single_epithelial_size'</span><span class="p">,</span>
+                <span class="s">'bare_nuclei'</span><span class="p">,</span>
+                <span class="s">'bland_chromatin'</span><span class="p">,</span>
+                <span class="s">'normal_nucleoli'</span><span class="p">,</span>
+                <span class="s">'mitoses'</span><span class="p">,</span>
+                <span class="s">'class'</span><span class="p">]</span>
+
+<span class="n">bcw</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data'</span><span class="p">,</span> 
+                  <span class="n">names</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+
+<span class="n">bcw</span><span class="p">[</span><span class="s">'bare_nuclei'</span><span class="p">]</span> <span class="o">=</span> <span class="n">bcw</span><span class="p">.</span><span class="n">bare_nuclei</span><span class="p">.</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span> <span class="o">==</span> <span class="s">'?'</span> <span class="k">else</span> <span class="n">np</span><span class="p">.</span><span class="n">nan</span><span class="p">)</span>
+<span class="n">bcw</span><span class="p">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Here the production of a correlation heatmap seems like a good beginning point as it will show the features of the data and illustrate the extent to which they relate to each other. This is achieved through the <code class="language-plaintext highlighter-rouge">.corr()</code> function being called on the dataframe.</p>
+
+<p>Once a correlation matrix has been produced it is a simple matter of plugging into the pre-written boiler plate heatmap plot (I wrote this once and liked it so much I have used it ever since).</p>
+
+<p>This gives the heatmap plot below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">correlation_matrix</span> <span class="o">=</span> <span class="n">bcw</span><span class="p">.</span><span class="n">corr</span><span class="p">()</span>
+
+<span class="n">sns</span><span class="p">.</span><span class="nb">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s">"white"</span><span class="p">)</span>
+<span class="c1"># Generate a mask for the upper triangle
+</span><span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">correlation_matrix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">mask</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="n">triu_indices_from</span><span class="p">(</span><span class="n">mask</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="c1"># Set up the matplotlib figure
+</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+<span class="c1"># Generate a custom diverging colormap
+</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">sns</span><span class="p">.</span><span class="n">diverging_palette</span><span class="p">(</span><span class="mi">220</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">as_cmap</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="c1"># Draw the heatmap with the mask and correct aspect ratio
+</span><span class="n">sns</span><span class="p">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">correlation_matrix</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="p">.</span><span class="mi">9</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">square</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s">"shrink"</span><span class="p">:</span> <span class="p">.</span><span class="mi">5</span><span class="p">},</span> <span class="n">annot</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Heatmap of Correlation'</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">'Correlation_Heatmap.png'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/Correlation_Heatmap.png" alt="Correlation Heatmap" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">y</span> <span class="o">=</span> <span class="n">bcw</span><span class="p">[</span><span class="s">'class'</span><span class="p">].</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">bcw</span><span class="p">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>For model evaluation it is obvious that a train-test split of the data will be necessary. This will allow us to train the KNN model on one set of data and evaluate on different data.</p>
+
+<p>This is standard practice in data science for the intuitively obvious reason that testing a model on the same data you trained it on is going to lead to artificially high evaluation scores.</p>
+
+<p>Having a relatively small dataset is a major drawback to this overall analysis and no amount of clever data science will make up for this weakness however it is important to train-test split in all circumstances regardless of the number of data.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.33</span><span class="p">)</span>
+<span class="n">knn</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">knn</span><span class="p">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>A baseline score - which can be said to be the number of accurate predictions that would be made if guesswork were applied - is calculated and shown.</p>
+
+<p>A model would be successful if it improved on this score and so it is important to know. Of course an actually successful model will improve on baseline <em>significantly</em>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span> <span class="s">'Baseline:</span><span class="se">\t</span><span class="s">'</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+<span class="k">print</span> <span class="s">'Model score:</span><span class="se">\t</span><span class="s">'</span><span class="p">,</span> <span class="n">knn</span><span class="p">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This cell is the most important. It shows the classification reports and gives a clear indication of the model’s performance.</p>
+
+<p>Here it is important to think about thresholds and false negatives.</p>
+
+<p>Consider that this is a dataset that relates to Cancer detection. In such circumstances it can be seen that the truly worst situation is the model predicting someone as ‘all clear’ when in fact they do have cancer. This is a so-called ‘false negative’.</p>
+
+<p>From the first classification report it can be seen that the model returned 6 people as healthy when in fact the true label was ‘cancer’. This is far too high. From this the decision was taken to adjust the thresholds to bias towards ‘cancer’, that is, to take a ‘better safe than sorry’ approach. This reduced the false negative rate to just a single instance.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># predicted test class:
+</span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">knn</span><span class="p">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># predicted test probability:
+</span><span class="n">y_pp</span> <span class="o">=</span> <span class="n">knn</span><span class="p">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Let's say again that we are predicting cancer based on some kind of detection measure, as before.
+# Accuracy Score
+</span><span class="n">conmat</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">classification_report</span> <span class="o">=</span> <span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+<span class="k">print</span> <span class="n">classification_report</span>
+
+<span class="n">confusion</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">conmat</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s">'is_cancer'</span><span class="p">,</span> <span class="s">'is_healthy'</span><span class="p">],</span>
+                         <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">'predicted_cancer'</span><span class="p">,</span><span class="s">'predicted_healthy'</span><span class="p">])</span>
+<span class="k">print</span> <span class="s">"50/50 Thresholds: </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">confusion</span>
+<span class="k">print</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+<span class="c1"># Get the predicted probability vector and explicitly name the columns:
+</span><span class="n">Y_pp</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">knn</span><span class="p">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">'class_0_pp'</span><span class="p">,</span><span class="s">'class_1_pp'</span><span class="p">])</span>
+<span class="n">Y_pp</span><span class="p">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">Y_pp</span><span class="p">[</span><span class="s">'pred_class_thresh10'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mf">0.10</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Y_pp</span><span class="p">.</span><span class="n">class_1_pp</span><span class="p">.</span><span class="n">values</span><span class="p">]</span>
+<span class="n">Y_pp</span><span class="p">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">conmat</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">Y_pp</span><span class="p">.</span><span class="n">pred_class_thresh10</span><span class="p">.</span><span class="n">values</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+
+<span class="n">confusion</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">conmat</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s">'is_cancer'</span><span class="p">,</span> <span class="s">'is_healthy'</span><span class="p">],</span>
+                         <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">'predicted_cancer'</span><span class="p">,</span><span class="s">'predicted_healthy'</span><span class="p">])</span>
+<span class="k">print</span> <span class="s">"Changed Thresholds: </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">confusion</span>
+<span class="k">print</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+</code></pre></div></div>
+
+<p>The final step was to produce a ROC curve. This is a curve that shows the true positive (recall) rate as the area under the curve. If this area is equal to one then the positive predictions are totally perfect and no false positives exist. The dotted line on the graph shows the baseline (0.5) rate which relates to a model which closely resembles guess work.</p>
+
+<p>It can be seen that the model created gives a ROC of 0.99 which is clearly very close to perfect.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># For class 1, find the area under the curve
+</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">Y_pp</span><span class="p">.</span><span class="n">class_1_pp</span><span class="p">)</span>
+<span class="n">roc_auc</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">)</span>
+
+<span class="c1"># Plot of a ROC curve for class 1 (has_cancer)
+</span><span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'ROC curve (area = %0.2f)'</span> <span class="o">%</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s">'k--'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlim</span><span class="p">([</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylim</span><span class="p">([</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'False Positive Rate'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'True Positive Rate'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">'Receiver operating characteristic for cancer detection'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">"lower right"</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">'ROC_plot.png'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">print</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+<span class="k">print</span> <span class="s">'fpr</span><span class="se">\t</span><span class="s">'</span><span class="p">,</span> <span class="s">'tpr</span><span class="se">\t</span><span class="s">'</span><span class="p">,</span> <span class="s">'threshold'</span>
+<span class="k">print</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span><span class="n">tpr</span><span class="p">,</span><span class="n">threshold</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/ROC_plot.png" alt="ROC Plot" /></p>
+
+  </div><a class="u-url" href="/2017/11/22/KNN.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Promethean Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Leo Edwards</li><li><a class="u-email" href="mailto:leojpedwards@gmail.com">leojpedwards@gmail.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/leo-e-100"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">leo-e-100</span></a></li><li><a href="https://www.twitter.com/leojpedwards"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">leojpedwards</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A place to keep my thoughts and projects</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
